@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Lightit\Backoffice\Cities\App\Request;
+namespace Lightit\Backoffice\Cities\App\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Lightit\Backoffice\Cities\Domain\DataTransferObjects\CityDto;

@@ -6,7 +6,6 @@ namespace Lightit\Backoffice\Cities\App\Transformers;
 
 use Flugg\Responder\Transformers\Transformer;
 use Lightit\Backoffice\Cities\Domain\Models\City;
-use Lightit\Backoffice\Users\Domain\Models\User;
 
 class CityTransformer extends Transformer
 {

@@ -30,6 +30,9 @@ use Lightit\Backoffice\Flights\Domain\Models\Flight;
  */
 class City extends Model
 {
+
+    protected $fillable = ['name'];
+
     /**
      * @return HasMany<Flight, City>
      */
