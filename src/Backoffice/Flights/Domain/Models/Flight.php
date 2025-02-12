@@ -10,19 +10,18 @@ use Lightit\Backoffice\Airlines\Domain\Models\Airline;
 use Lightit\Backoffice\Cities\Domain\Models\City;
 
 /**
- * 
- *
- * @property int $id
- * @property int $airline_id
- * @property int $origin_id
- * @property int $destination_id
- * @property string $departure
- * @property string $arrival
+ * @property int                             $id
+ * @property int                             $airline_id
+ * @property int                             $origin_id
+ * @property int                             $destination_id
+ * @property string                          $departure
+ * @property string                          $arrival
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Airline $airline
  * @property-read City|null $destinationCity
  * @property-read City|null $originCity
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight query()
@@ -34,6 +33,7 @@ use Lightit\Backoffice\Cities\Domain\Models\City;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight whereOriginId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class Flight extends Model

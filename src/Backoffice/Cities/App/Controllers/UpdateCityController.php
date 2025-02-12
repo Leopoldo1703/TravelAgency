@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Lightit\Backoffice\Cities\App\Controllers;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class UpdateCityController
+{
+    public function __invoke(Request $request): JsonResponse
+    {
+        return responder()
+            ->success()
+            ->respond();
+    }
+}

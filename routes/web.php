@@ -7,3 +7,6 @@ Route::get('invalid', static fn() => throw new InvalidActionException("Is not va
 
 Route::get('{unknown}', static fn () => view('app  '))->where('unknown', '^(?!api).*$');
 
+
+
+
