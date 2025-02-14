@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Lightit\Backoffice\Flights\App\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Lightit\Backoffice\Flights\App\Requests\UpdateFlightRequest;
 use Lightit\Backoffice\Flights\App\Transformers\FlightTransformer;
 use Lightit\Backoffice\Flights\Domain\Actions\UpdateFlightAction;
@@ -16,6 +15,7 @@ class UpdateFlightController
     public function __invoke(Flight $flight, UpdateFlightRequest $request, UpdateFlightAction $action): JsonResponse
     {
         $flight = $action->execute($flight, $request->toDto());
+
         return responder()
             ->success($flight, FlightTransformer::class)
             ->respond();

@@ -17,7 +17,7 @@ class ListCitiesAction
     public function execute(): Collection
     {
         return QueryBuilder::for(City::class)
-            ->allowedSorts('name', 'id')
+            ->withCount(['departures', 'arrivals'])
             ->get();
     }
 }

@@ -17,7 +17,7 @@ class UpdateFlightAction
             'destination_id' => $flightDto->getDestinationId(),
             'departure' => $flightDto->getDeparture(),
             'arrival' => $flightDto->getArrival(),
-        ], fn($value) => !is_null($value)));
+        ], fn ($value) =>! empty($value)));
 
         $flight->save();
 

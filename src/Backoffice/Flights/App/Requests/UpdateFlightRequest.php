@@ -11,9 +11,13 @@ use Lightit\Backoffice\Flights\Domain\DataTransferObjects\FlightDto;
 class UpdateFlightRequest extends FormRequest
 {
     public const AIRLINE_ID = 'airline_id';
+
     public const ORIGIN_ID = 'origin_id';
+
     public const DESTINATION_ID = 'destination_id';
+
     public const DEPARTURE = 'departure';
+
     public const ARRIVAL = 'arrival';
 
     public function rules(): array
