@@ -38,7 +38,7 @@ class City extends Model
     public function departures()
     {
         /** @var HasMany<Flight, self> */
-        return $this->hasMany(Flight::class, 'origin_city_id');
+        return $this->hasMany(Flight::class, 'departures_id');
     }
 
     /**
@@ -47,6 +47,6 @@ class City extends Model
     public function arrivals()
     {
         /** @var HasMany<Flight, self> */
-        return $this->hasMany(Flight::class, 'origin_city_id');
+        return $this->hasMany(Flight::class, 'origin_id');
     }
 }

@@ -5,14 +5,22 @@ declare(strict_types=1);
 namespace Lightit\Backoffice\Flights\App\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Lightit\Backoffice\Flights\App\Requests\StoreFlightRequest;
+use Lightit\Backoffice\Flights\App\Transformers\FlightTransformer as TransformersFlightTransformer;
+use Lightit\Backoffice\Flights\Domain\Actions\StoreFlightAction;
 
 class StoreFlightController
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(StoreFlightRequest $request, StoreFlightAction $action): JsonResponse
     {
+        $flight = $action->execute($request->toDto());
+
         return responder()
-            ->success()
-            ->respond();
+            ->success($flight, TransformersFlightTransformer::class)
+            ->respond(
+                $flight->wasRecentlyCreated
+                    ? JsonResponse::HTTP_CREATED
+                    : JsonResponse::HTTP_OK
+            );
     }
 }

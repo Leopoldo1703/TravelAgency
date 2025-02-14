@@ -6,13 +6,17 @@ namespace Lightit\Backoffice\Flights\App\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Lightit\Backoffice\Flights\App\Transformers\FlightTransformer;
+use Lightit\Backoffice\Flights\Domain\Actions\ListFlightsAction;
 
 class ListFlightsController
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(ListFlightsAction $action): JsonResponse
     {
+        $flights = $action->execute();
+
         return responder()
-            ->success()
+            ->success($flights, FlightTransformer::class)
             ->respond();
     }
 }

@@ -6,15 +6,16 @@ namespace Lightit\Backoffice\Flights\App\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Lightit\Backoffice\Flights\App\Transformers\FlightTransformer;
 use Lightit\Backoffice\Flights\Domain\Models\Flight;
 
-class GetFlightController
+class DeleteFlightController
 {
     public function __invoke(Flight $flight): JsonResponse
     {
+        $flight->delete();
+
         return responder()
-            ->success($flight, FlightTransformer::class)
+            ->success()
             ->respond();
     }
 }

@@ -30,12 +30,17 @@ use Lightit\Backoffice\Flights\Domain\Models\Flight;
  */
 class Airline extends Model
 {
+    protected $fillable = [
+        'name',
+        'description',
+    ];
+
     /**
      * @return HasMany<Flight, Airline>
      */
     public function flights()
     {
         /** @var HasMany<Flight, self> */
-        return $this->hasMany(Flight::class, 'origin_city_id');
+        return $this->hasMany(Flight::class);
     }
 }

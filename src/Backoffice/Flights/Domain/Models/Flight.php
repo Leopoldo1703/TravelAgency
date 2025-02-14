@@ -38,6 +38,14 @@ use Lightit\Backoffice\Cities\Domain\Models\City;
  */
 class Flight extends Model
 {
+    protected $fillable = [
+        'airline_id',
+        'origin_id',
+        'destination_id',
+        'departure',
+        'arrival',
+    ];
+
     /**
      * @return BelongsTo<Airline, Flight>
      */
@@ -53,7 +61,7 @@ class Flight extends Model
     public function originCity()
     {
         /** @var BelongsTo<City, self> */
-        return $this->belongsTo(City::class, 'origin_city_id');
+        return $this->belongsTo(City::class, 'origin_id');
     }
 
     /**
@@ -62,6 +70,6 @@ class Flight extends Model
     public function destinationCity()
     {
         /** @var BelongsTo<City, self> */
-        return $this->belongsTo(City::class, 'destination_city_id');
+        return $this->belongsTo(City::class, 'destination_id');
     }
 }
