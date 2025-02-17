@@ -35,11 +35,17 @@
         <div class="mt-8 flow-root">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="flex space-x-4 mb-4">
+                <select id="filter-airline" class="rounded-md border-2 border-indigo-600 text-sm">
+                    <option value="">Filter by Airline</option>
+                </select>
+                <button id="apply-filters" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Apply</button>
+            </div>
                 <table id="cities-table" class="min-w-full divide-y divide-gray-300">
                 <thead>
                     <tr>
                     <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-3">ID</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer" id="sort-name">Name</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of incoming flights</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of outgoing flights</th>
                     <th scope="col" class="relative py-3.5 pr-4 pl-3 sm:pr-3">
@@ -60,17 +66,46 @@
         </div>
         </div>
         <script>
+            let sortDirection = 'asc';
 
-            function loadCities() {
+            function loadAirlines(){
                 $.ajax({
-                    url: `api/cities`,
+                    url: `api/airlines`,
                     method: 'GET',
                     dataType: 'json',
                     headers: {
                         'Accept': 'application/json'
                     },
                     success: function(response) {
-                        console.log(response);
+                        const { data } = response;
+                        const select = $('#filter-airline');
+                        select.empty();
+                        select.append('<option value="">Filter by Airline</option>');
+
+                        data.forEach(airline => {
+                            select.append(`<option value="${airline.id}">${airline.name}</option>`);
+                        });
+                    },
+                    error: function() {
+                        alert('Error loading airlines');
+                    }
+                })
+            }
+
+            function loadCities() {
+                const airline = $('#filter-airline').val();
+                $.ajax({
+                    url: `api/cities`,
+                    method: 'GET',
+                    data: {
+                        'filter[airline]': airline,
+                        'sort': sortDirection === 'asc' ? 'name' : '-name',
+                    },
+                    dataType: 'json',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
                         const { data } = response;
                         const tbody = $('#cities-table tbody');
                         tbody.empty();
@@ -87,7 +122,7 @@
                                             <a href="#" class="edit text-indigo-600 hover:text-indigo-900" data-id="${city.id}" data-name="${city.name}">Edit</a>
                                         </td>
                                         <td class="relative py-4 pl-3 text-right text-sm font-medium">
-                                            <a href="#" class="delete text-indigo-600 hover:text-indigo-900" data-id="${city.id}">Delete</a>
+                                            <a href="#" class="delete text-red-600 hover:text-red-900" data-id="${city.id}">Delete</a>
                                         </td>
                                     </tr>
                                 `);
@@ -155,16 +190,14 @@
                 const cityName = prompt("Enter new city name:");
 
                 if (cityName) {
-                    // Hacer la solicitud POST para agregar una nueva ciudad
                     $.ajax({
                         url: '/api/cities',
                         method: 'POST',
                         data: {
                             name: cityName,
-                            _token: $('meta[name="csrf-token"]').attr('content') // Incluir el CSRF token si es necesario
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            // Recargar la lista de ciudades
                             loadCities();
                             alert("City added successfully!");
                         },
@@ -176,71 +209,17 @@
                 }
             });
 
-            // $('#add-city').click(function() {
-            //     const name = $('#city-name').val().trim();
-            //     if (!name) {
-            //         alert('City name cannot be empty');
-            //         return;
-            //     }
+            $('#apply-filters').on('click', function() {
+                loadCities();
+            });
 
-            //     $.ajax({
-            //         url: '/cities',
-            //         method: 'POST',
-            //         data: { name },
-            //         success: function(response) {
-            //             alert('City added successfully!');
-            //             $('#city-name').val('');
-            //             loadCities();
-            //         },
-            //         error: function(xhr) {
-            //             alert(xhr.responseJSON.message);
-            //         }
-            //     });
-            // });
+            $('#sort-name').on('click', function() {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                loadCities();
+            });
 
-            // // Editar ciudad
-            // $(document).on('click', '.edit', function() {
-            //     const id = $(this).data('id');
-            //     const newName = prompt('Enter new city name:', $(this).data('name'));
-
-            //     if (newName && newName.trim()) {
-            //         $.ajax({
-            //             url: `/cities/${id}`,
-            //             method: 'PUT',
-            //             data: { name: newName.trim() },
-            //             success: function() {
-            //                 alert('City updated successfully!');
-            //                 loadCities();
-            //             }
-            //         });
-            //     }
-            // });
-
-            // // Eliminar ciudad
-            // $(document).on('click', '.delete', function() {
-            //     const id = $(this).data('id');
-            //     if (confirm('Are you sure you want to delete this city?')) {
-            //         $.ajax({
-            //             url: `/cities/${id}`,
-            //             method: 'DELETE',
-            //             success: function() {
-            //                 alert('City deleted successfully!');
-            //                 loadCities();
-            //             }
-            //         });
-            //     }
-            // });
-
-
-            // // Ordenar tabla
-            // $('.sort').click(function() {
-            //     sortColumn = $(this).data('column');
-            //     sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            //     loadCities();
-            // });
-
-            // Cargar ciudades al inicio
             $(document).ready(function() {
+                loadAirlines();
                 loadCities();
             });
     </script>
