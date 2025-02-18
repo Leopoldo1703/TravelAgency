@@ -56,9 +56,11 @@ Route::prefix('cities')
     ->group(static function () {
         Route::post('/', StoreCityController::class)->name('cities');
         Route::get('/', ListCitiesController::class);
-        Route::get('/{city}', GetCityController::class)->withTrashed();
-        Route::patch('/{city}', UpdateCityController::class);
-        Route::delete('/{city}', DeleteCityController::class);
+        Route::prefix('{city}')->group(function () {
+            Route::get('/', GetCityController::class);
+            Route::patch('/', UpdateCityController::class);
+            Route::delete('/', DeleteCityController::class);
+        });
     });
 
 Route::prefix('airlines')
@@ -66,9 +68,11 @@ Route::prefix('airlines')
     ->group(static function () {
         Route::get('/', ListAirlinesController::class);
         Route::post('/', StoreAirlineController::class);
-        Route::get('/{airline}', GetAirlineController::class)->withTrashed();
-        Route::patch('/{airline}', UpdateAirlineController::class);
-        Route::delete('/{airline}', DeleteAirlineController::class);
+        Route::prefix('{airline}')->group(function () {
+            Route::get('/', GetAirlineController::class);
+            Route::put('/', UpdateAirlineController::class);
+            Route::delete('/', DeleteAirlineController::class);
+        });
     });
 
 Route::prefix('flights')
@@ -76,7 +80,9 @@ Route::prefix('flights')
     ->group(static function () {
         Route::post('/', StoreFlightController::class)->name('flights');
         Route::get('/', ListFlightsController::class);
-        Route::get('/{flight}', GetFlightController::class)->withTrashed();
-        Route::patch('/{flight}', UpdateFlightController::class);
-        Route::delete('/{flight}', DeleteFlightController::class);
+        Route::prefix('/{flight}')->group(function () {
+            Route::get('/', ListFlightsController::class);
+            Route::put('/', UpdateFlightController::class);
+            Route::delete('/', DeleteFlightController::class);
+        });
     });

@@ -36,11 +36,10 @@ class Airline extends Model
     ];
 
     /**
-     * @return HasMany<Flight, Airline>
+     * @return HasMany<Flight, $this>
      */
     public function flights()
     {
-        /** @var HasMany<Flight, self> */
         return $this->hasMany(Flight::class);
     }
 }

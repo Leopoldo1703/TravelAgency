@@ -17,10 +17,6 @@ class StoreAirlineController
 
         return responder()
             ->success($airline, AirlineTransformer::class)
-            ->respond(
-                $airline->wasRecentlyCreated
-                    ? JsonResponse::HTTP_CREATED
-                    : JsonResponse::HTTP_OK
-            );
+            ->respond(JsonResponse::HTTP_CREATED);
     }
 }

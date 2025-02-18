@@ -33,20 +33,18 @@ class City extends Model
     protected $fillable = ['name'];
 
     /**
-     * @return HasMany<Flight, City>
+     * @return HasMany<Flight, $this>
      */
     public function departures()
     {
-        /** @var HasMany<Flight, self> */
         return $this->hasMany(Flight::class, 'origin_id');
     }
 
     /**
-     * @return HasMany<Flight, City>
+     * @return HasMany<Flight, $this>
      */
     public function arrivals()
     {
-        /** @var HasMany<Flight, self> */
         return $this->hasMany(Flight::class, 'destination_id');
     }
 }

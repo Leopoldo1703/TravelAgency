@@ -25,14 +25,15 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold text-gray-900">Cities</h1>
-            <p class="mt-2 text-sm text-gray-700">A list of all the cities available as travel origins or destinations.</p>
+            <h1 class="text-base font-semibold text-gray-900">Airlines</h1>
+            <p class="mt-2 text-sm text-gray-700">Manage all airlines and their details.</p>
             </div>
         </div>
         <div class="flex flex-col space-y-2 mt-6">
             <div class="flex space-x-2">
-                <input type="text" id="new-city-name" class="rounded-md border-2 border-gray-400 text-sm p-2 w-64" placeholder="Enter city name">
-                <button id="add-city-btn" type="button" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add city</button>
+                <input type="text" id="new-airline-name" class="rounded-md border-2 border-gray-400 text-sm p-2 w-64" placeholder="Enter airline name">
+                <input type="text" id="new-airline-desscription" class="rounded-md border-2 border-gray-400 text-sm p-2 w-64" placeholder="Enter airline description">
+                <button id="add-airline-btn" type="button" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Add airline</button>
             </div>
             <div id="message-box" class="hidden w-64 p-2 text-center text-white text-sm font-semibold rounded-md"></div>
         </div>
@@ -40,18 +41,18 @@
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <div class="flex space-x-4 mb-4">
-                <select id="filter-airline" class="rounded-md border-2 border-gray-400 text-sm">
-                    <option value="">Filter by Airline</option>
+                <select id="filter-city" class="rounded-md border-2 border-gray-400 text-sm">
+                    <option value="">Filter by City</option>
                 </select>
                 <button id="apply-filters" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Apply</button>
             </div>
-                <table id="cities-table" class="min-w-full divide-y divide-gray-300">
+                <table id="airlines-table" class="min-w-full divide-y divide-gray-300">
                 <thead>
                     <tr>
                     <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-3">ID</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer" id="sort-name">Name</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of incoming flights</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of outgoing flights</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Description</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of flights</th>
                     <th scope="col" class="relative py-3.5 pr-4 pl-3 sm:pr-3">
                         <span class="sr-only">Edit</span>
                     </th>
@@ -70,75 +71,35 @@
         </div>
         </div>
         <script>
-            let sortDirection = 'asc';
 
-            function loadAirlines(){
-                $.ajax({
-                    url: `api/airlines`,
-                    method: 'GET',
-                    dataType: 'json',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    success: function(response) {
-                        const { data } = response;
-                        const select = $('#filter-airline');
-                        select.empty();
-                        select.append('<option value="">Filter by Airline</option>');
+            async function loadAirlines() {
+                try {
+                    const response = await fetch('/api/airlines');
+                    const airlines = await response.json();
 
-                        data.forEach(airline => {
-                            select.append(`<option value="${airline.id}">${airline.name}</option>`);
-                        });
-                    },
-                    error: function() {
-                        alert('Error loading airlines');
-                    }
-                })
-            }
+                    const tbody = document.querySelector('#airlines-table tbody');
+                    tbody.innerHTML = '';
 
-            function loadCities() {
-                const airline = $('#filter-airline').val();
-                $.ajax({
-                    url: `api/cities`,
-                    method: 'GET',
-                    data: {
-                        'filter[airline]': airline,
-                        'sort': sortDirection === 'asc' ? 'name' : '-name',
-                    },
-                    dataType: 'json',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    success: function(response) {
-                        const { data } = response;
-                        const tbody = $('#cities-table tbody');
-                        tbody.empty();
+                    console.log(airlines.data);
 
-                        if (data && data.length > 0) {
-                            data.forEach(city => {
-                                tbody.append(`
-                                    <tr data-id="${city.id}">
-                                        <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">${city.id}</td>
-                                        <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${city.name}</td>
-                                        <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${city.number_of_arrivals}</td>
-                                        <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${city.number_of_departures}</td>
-                                        <td class="relative py-4 pl-3 text-right text-sm font-medium">
-                                            <a href="#" class="edit text-indigo-600 hover:text-indigo-900" data-id="${city.id}" data-name="${city.name}">Edit</a>
-                                        </td>
-                                        <td class="relative py-4 pl-3 text-right text-sm font-medium">
-                                            <a href="#" class="delete text-red-600 hover:text-red-900" data-id="${city.id}">Delete</a>
-                                        </td>
-                                    </tr>
-                                `);
-                            });
-                        } else {
-                            tbody.append('<tr><td colspan="5">No cities found.</td></tr>');
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error("Error en la llamada AJAX:", xhr);
-                    }
-                });
+                    airlines.data.forEach(airline => {
+                        tbody.innerHTML += `
+                            <tr data-id="${airline.id}">
+                                <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">${airline.id}</td>
+                                <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${airline.name}</td>
+                                <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${airline.description}</td>
+                                <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${airline.number_of_flights}</td>
+                                <td class="relative py-4 pl-3 text-right text-sm font-medium">
+                                    <a href="#" class="edit text-indigo-600 hover:text-indigo-900" data-id="${airline.id}" data-name="${airline.name}">Edit</a>
+                                </td>
+                                <td class="relative py-4 pl-3 text-right text-sm font-medium">
+                                    <a href="#" class="delete text-red-600 hover:text-red-900" data-id="${airline.id}">Delete</a>
+                                </td>
+                            </tr>`;
+                    });
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             }
 
             function showMessage(message, type = 'success') {
@@ -151,94 +112,72 @@
                 }, 3000);
             }
 
-            $(document).on('click', '.edit', function() {
-                const cityId = $(this).data('id');
-                const cityName = $(this).data('name');
-                console.log(cityId, cityName);
+            document.getElementById('add-airline-btn').addEventListener('click', async () => {
+                const name = document.getElementById('new-airline-name').value.trim();
+                const description = document.getElementById('new-airline-desscription').value.trim();
 
-                const newName = prompt("Enter new city name:", cityName);
-
-                if (newName && newName !== cityName) {
-                    $.ajax({
-                        url: `/api/cities/${cityId}`,
-                        method: 'PATCH',
-                        data: {
-                            name: newName,
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            loadCities();
-                            alert("City updated successfully!");
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error updating city:", error);
-                            alert("Failed to update city!");
-                        }
-                    });
-                }
-            });
-
-            $(document).on('click', '.delete', function() {
-                const cityId = $(this).data('id');
-
-                if (confirm("Are you sure you want to delete this city?")) {
-                    $.ajax({
-                        url: `/api/cities/${cityId}`,
-                        method: 'DELETE',
-                        data: {
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            loadCities();
-                            alert("City deleted successfully!");
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error deleting city:", error);
-                            alert("Failed to delete city!");
-                        }
-                    });
-                }
-            });
-
-            $('#add-city-btn').on('click', function() {
-                const cityName = $('#new-city-name').val().trim();
-
-                if (!cityName) {
-                    alert('Please enter a valid city name.');
+                if (!name || !description) {
+                    document.getElementById('message-box').classList.remove('hidden');
+                    document.getElementById('message-box').classList.add('bg-red-500');
+                    document.getElementById('message-box').innerText = 'Please enter airline name and description';
                     return;
                 }
 
-                $.ajax({
-                    url: '/api/cities',
-                    method: 'POST',
-                    data: {
-                        name: cityName,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        $('#new-city-name').val(''); // Limpiar el campo
-                        loadCities();
-                        showMessage('City added successfully!', 'success');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error adding city:', error);
-                        showMessage('Failed to add city!', 'error');
+                try {
+                    const response = await fetch('/api/airlines', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, description }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showMessage('Airline added successfully');
+                        loadAirlines();
+                    } else {
+                        alert('Failed to add airline. It may already exist.');
                     }
-                });
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             });
 
-            $('#apply-filters').on('click', function() {
-                loadCities();
+            async function deleteAirline(id) {
+                if (!confirm('Are you sure you want to delete this airline?')) return;
+
+                try {
+                    const response = await fetch(`/api/airlines/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('Airline deleted successfully!');
+                        loadAirlines();
+                    } else {
+                        alert('Failed to delete airline.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting airline:', error);
+                }
+            }
+
+            document.addEventListener('click', (event) => {
+                if (event.target.classList.contains('delete')) {
+                    const id = event.target.getAttribute('data-id');
+                    deleteAirline(id);
+                }
             });
 
-            $('#sort-name').on('click', function() {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                loadCities();
-            });
-
-            $(document).ready(function() {
+            document.addEventListener('DOMContentLoaded', () => {
                 loadAirlines();
-                loadCities();
             });
-    </script>
+        </script>
     </body>
+
+

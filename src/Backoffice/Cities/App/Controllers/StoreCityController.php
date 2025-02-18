@@ -17,10 +17,6 @@ class StoreCityController
 
         return responder()
             ->success($city, CityTransformer::class)
-            ->respond(
-                $city->wasRecentlyCreated
-                    ? JsonResponse::HTTP_CREATED
-                    : JsonResponse::HTTP_OK
-            );
+            ->respond(JsonResponse::HTTP_CREATED);
     }
 }

@@ -34,6 +34,10 @@ use Lightit\Backoffice\Cities\Domain\Models\City;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight whereOriginId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight whereUpdatedAt($value)
  *
+ * @property int $Lightit\Backoffice\Airlines\Domain\Models\Airline
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Flight whereLightit\Backoffice\Airlines\Domain\Models\Airline($value)
+ *
  * @mixin \Eloquent
  */
 class Flight extends Model
@@ -47,29 +51,26 @@ class Flight extends Model
     ];
 
     /**
-     * @return BelongsTo<Airline, Flight>
+     * @return BelongsTo<Airline, $this>
      */
     public function airline()
     {
-        /** @var BelongsTo<Airline, self> */
         return $this->belongsTo(Airline::class);
     }
 
     /**
-     * @return BelongsTo<City, Flight>
+     * @return BelongsTo<City, $this>
      */
     public function originCity()
     {
-        /** @var BelongsTo<City, self> */
         return $this->belongsTo(City::class, 'origin_id');
     }
 
     /**
-     * @return BelongsTo<City, Flight>
+     * @return BelongsTo<City, $this>
      */
     public function destinationCity()
     {
-        /** @var BelongsTo<City, self> */
         return $this->belongsTo(City::class, 'destination_id');
     }
 }

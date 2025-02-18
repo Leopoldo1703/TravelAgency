@@ -17,10 +17,6 @@ class StoreFlightController
 
         return responder()
             ->success($flight, TransformersFlightTransformer::class)
-            ->respond(
-                $flight->wasRecentlyCreated
-                    ? JsonResponse::HTTP_CREATED
-                    : JsonResponse::HTTP_OK
-            );
+            ->respond(JsonResponse::HTTP_CREATED);
     }
 }
