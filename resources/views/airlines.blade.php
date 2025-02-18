@@ -71,10 +71,31 @@
         </div>
         </div>
         <script>
+            let editingAirlineId = 0;
 
-            async function loadAirlines() {
+            async function loadCities() {
                 try {
-                    const response = await fetch('/api/airlines');
+                    const response = await fetch('/api/cities');
+                    const cities = await response.json();
+
+                    const select = document.getElementById('filter-city');
+                    select.innerHTML = '<option value="">Filter by City</option>';
+
+                    cities.data.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.id;
+                        option.textContent = city.name;
+                        select.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading cities:', error);
+                }
+            }
+
+            async function loadAirlines(cityId = '') {
+                try {
+                    const query = cityId ? `?filter[city]=${cityId}` : '';
+                    const response = await fetch(`/api/airlines${query}`);
                     const airlines = await response.json();
 
                     const tbody = document.querySelector('#airlines-table tbody');
@@ -83,6 +104,23 @@
                     console.log(airlines.data);
 
                     airlines.data.forEach(airline => {
+                        if (editingAirlineId == airline.id){
+                            tbody.innerHTML += `
+                            <tr data-id="${airline.id}">
+                                <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">${airline.id}</td>
+                                <td class="px-3 py-4 text-sm">
+                                    <input type="text" id="edit-name-${airline.id}" value="${airline.name}" class="rounded-md border border-gray-300 p-1 w-full">
+                                </td>
+                                <td class="px-3 py-4 text-sm">
+                                    <input type="text" id="edit-description-${airline.id}" value="${airline.description}" class="rounded-md border border-gray-300 p-1 w-full">
+                                </td>
+                                    <td class="relative py-4 pl-3 text-right text-sm font-medium">
+                                        <button class="save text-green-600 hover:text-green-900 mr-2" data-id="${airline.id}">Save</button>
+                                        <button class="cancel text-gray-600 hover:text-gray-900 ml-2" data-id="${airline.id}">Cancel</button>
+                                    </td>
+                            </tr>`;
+                        }
+                        else{
                         tbody.innerHTML += `
                             <tr data-id="${airline.id}">
                                 <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">${airline.id}</td>
@@ -96,11 +134,17 @@
                                     <a href="#" class="delete text-red-600 hover:text-red-900" data-id="${airline.id}">Delete</a>
                                 </td>
                             </tr>`;
+                        }
                     });
                 } catch (error) {
                     console.error('Error:', error);
                 }
             }
+
+            document.getElementById('apply-filters').addEventListener('click', () => {
+                const cityId = document.getElementById('filter-city').value;
+                loadAirlines(cityId);
+            });
 
             function showMessage(message, type = 'success') {
                 const box = $('#message-box');
@@ -146,14 +190,9 @@
             });
 
             async function deleteAirline(id) {
-                if (!confirm('Are you sure you want to delete this airline?')) return;
-
                 try {
                     const response = await fetch(`/api/airlines/${id}`, {
                         method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
                     });
 
                     if (response.ok) {
@@ -168,13 +207,69 @@
             }
 
             document.addEventListener('click', (event) => {
-                if (event.target.classList.contains('delete')) {
-                    const id = event.target.getAttribute('data-id');
-                    deleteAirline(id);
+                const deleteButton = event.target.closest('.delete');
+                if (deleteButton) {
+                    const id = deleteButton.dataset.id;
+                    if (id) {
+                        if (confirm('Are you sure you want to delete this airline?')) {
+                            deleteAirline(id);
+                        }
+                    } else {
+                        console.error('Airline ID is missing.');
+                    }
                 }
             });
 
+            document.body.addEventListener('click', (event) => {
+                const editButton = event.target.closest('.edit');
+                const saveButton = event.target.closest('.save');
+                const cancelButton = event.target.closest('.cancel');
+
+                if (editButton) {
+                    editingAirlineId = editButton.dataset.id;
+                    loadAirlines();
+                }
+
+                if (saveButton) {
+                    const id = saveButton.dataset.id;
+                    const name = document.getElementById(`edit-name-${id}`).value;
+                    const description = document.getElementById(`edit-description-${id}`).value;
+                    updateAirline(id, name, description);
+                }
+
+                if (cancelButton) {
+                    editingAirlineId = 0;
+                    loadAirlines();
+                }
+            });
+
+            async function updateAirline(id, name, description) {
+                try {
+                    const response = await fetch(`/api/airlines/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, description })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert('Airline updated successfully!');
+                        editingAirlineId = 0;
+                        loadAirlines();
+                    } else {
+                        alert(`Failed to update airline: ${data.message}`);
+                    }
+                } catch (error) {
+                    console.error('Error updating airline:', error);
+                }
+            }
+
+
             document.addEventListener('DOMContentLoaded', () => {
+                loadCities();
                 loadAirlines();
             });
         </script>

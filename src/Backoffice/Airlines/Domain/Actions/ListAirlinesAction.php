@@ -24,7 +24,10 @@ class ListAirlinesAction
 
         $query ->allowedFilters([
                 AllowedFilter::callback('active_flights', function (Builder $query, int $value) {
-                    $query->whereRaw('(select count(*) from flights where flights.airline_id = airlines.id) = ?', [$value]);
+                    $query->whereRaw(
+                        '(select count(*) from flights where flights.airline_id = airlines.id) = ?',
+                        [$value]
+                    );
                 }),
 
                 AllowedFilter::callback('city', function (Builder $query, int $value) {
