@@ -31,7 +31,7 @@ class ListCitiesAction
                 });
             }),
         ])
-        ->allowedSorts('name')
+        ->allowedSorts(['name', 'id'])
         ->defaultSort('id');
 
         return $query->get();

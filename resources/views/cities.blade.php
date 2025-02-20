@@ -29,8 +29,8 @@
                 <table id="cities-table" class="min-w-full divide-y divide-gray-300">
                 <thead>
                     <tr>
-                    <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-3">ID</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer" id="sort-name">Name</th>
+                    <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-3 cursor-pointer items-center gap-1" id="sort-id">ID<span class="sort-icon">⇅</span></th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer items-center gap-1" id="sort-name">Name<span class="sort-icon">⇅</span></th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of incoming flights</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of outgoing flights</th>
                     <th scope="col" class="relative py-3.5 pr-4 pl-3 sm:pr-3">
@@ -55,7 +55,18 @@
 @push('scripts')
     <script>
         let sortDirection = 'asc';
+        let currentSort = 'id';
         let editingCityId = 0;
+
+        function toggleSort(column) {
+            if (currentSort === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort = column;
+                sortDirection = 'asc';
+            }
+            loadCities();
+        }
 
         function loadAirlines(){
             $.ajax({
@@ -88,7 +99,8 @@
                 method: 'GET',
                 data: {
                     'filter[airline]': airline,
-                    'sort': sortDirection === 'asc' ? 'name' : '-name',
+                    'sort': sortDirection === 'asc' ? currentSort : `-${currentSort}`,
+
                 },
                 dataType: 'json',
                 headers: {
@@ -242,8 +254,11 @@
         });
 
         $('#sort-name').on('click', function() {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            loadCities();
+            toggleSort('name');
+        });
+
+        $('#sort-id').on('click', function() {
+            toggleSort('id');
         });
 
         $(document).ready(function() {

@@ -15,6 +15,10 @@ Route::get('/airlines', function () {
     return view('airlines');
 });
 
+Route::get('/flights', function () {
+    return view('flights');
+});
+
 Route::get('invalid', static fn() => throw new InvalidActionException("Is not valid"));
 
 Route::get('{unknown}', static fn () => view('app  '))->where('unknown', '^(?!api).*$');

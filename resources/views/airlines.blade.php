@@ -25,13 +25,14 @@
                 <select id="filter-city" class="rounded-md border-2 border-gray-400 text-sm">
                     <option value="">Filter by City</option>
                 </select>
+                <input type="number" id="filter-flights" class="rounded-md border-2 border-gray-400 text-sm p-2 w-40" placeholder="Flights Count">
                 <button id="apply-filters" class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Apply</button>
             </div>
                 <table id="airlines-table" class="min-w-full divide-y divide-gray-300">
                 <thead>
                     <tr>
                     <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 sm:pl-3">ID</th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer" id="sort-name">Name</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Description</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Number of flights</th>
                     <th scope="col" class="relative py-3.5 pr-4 pl-3 sm:pr-3">
@@ -76,10 +77,16 @@
             }
         }
 
-        async function loadAirlines(cityId = '') {
+        async function loadAirlines(cityId = '', flightCount = '') {
             try {
-                const query = cityId ? `?filter[city]=${cityId}` : '';
-                const response = await fetch(`/api/airlines${query}`);
+                let query = [];
+
+                if (cityId) query.push(`filter[city]=${cityId}`);
+                if (flightCount) query.push(`filter[active_flights]=${flightCount}`);
+
+                const queryString = query.length ? `?${query.join('&')}` : '';
+
+                const response = await fetch(`/api/airlines${queryString}`);
                 const airlines = await response.json();
 
                 const tbody = document.querySelector('#airlines-table tbody');
@@ -127,7 +134,8 @@
 
         document.getElementById('apply-filters').addEventListener('click', () => {
             const cityId = document.getElementById('filter-city').value;
-            loadAirlines(cityId);
+            const flightCount = document.getElementById('filter-flights').value;
+            loadAirlines(cityId, flightCount);
         });
 
         function showMessage(message, type = 'success') {
