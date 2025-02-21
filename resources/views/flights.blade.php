@@ -3,6 +3,6 @@
 @section('title', content: 'Manage Flights')
 
 @section('content')
-<x-airline-select />
-<x-city-select />
+<x-flight-form />
+<x-flight-table />
 @endsection

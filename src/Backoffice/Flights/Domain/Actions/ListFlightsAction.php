@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Lightit\Backoffice\Flights\Domain\Actions;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Lightit\Backoffice\Flights\Domain\Models\Flight;
 
 class ListFlightsAction
 {
     /**
-     * @return Collection<int, Flight>
+     * @return LengthAwarePaginator<Flight>
      */
-    public function execute(): Collection
+    public function execute(): LengthAwarePaginator
     {
-        return Flight::with(['airline', 'originCity', 'destinationCity'])->get();
+        return Flight::with(['airline', 'originCity', 'destinationCity'])->paginate(10);
     }
 }

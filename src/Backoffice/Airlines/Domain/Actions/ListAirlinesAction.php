@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Lightit\Backoffice\Airlines\Domain\Actions;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Lightit\Backoffice\Airlines\Domain\Models\Airline;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -14,9 +14,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 class ListAirlinesAction
 {
     /**
-     * @return Collection<int, Model>
+     * @return LengthAwarePaginator<Model>
      */
-    public function execute(): Collection
+    public function execute(): LengthAwarePaginator
     {
         /** @var QueryBuilder $query */
         $query = QueryBuilder::for(Airline::class)
@@ -40,6 +40,6 @@ class ListAirlinesAction
             ->allowedSorts(['name', 'flights_count'])
             ->defaultSort('id');
 
-        return $query->get();
+        return $query->paginate(10);
     }
 }

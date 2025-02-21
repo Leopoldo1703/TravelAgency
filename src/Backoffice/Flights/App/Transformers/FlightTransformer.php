@@ -17,8 +17,11 @@ class FlightTransformer extends Transformer
         return [
             'id' => $flight->id,
             'airline_id' => $flight->airline_id,
+            'airline_name' => $flight->airline->name,
             'origin_id' => $flight->origin_id,
+            'origin_name' => $flight->originCity ? $flight->originCity->name : null,
             'destination_id' => $flight->destination_id,
+            'destination_name'=> $flight->destinationCity ? $flight->destinationCity->name : null,
             'departure' => $flight->departure,
             'arrival' => $flight->arrival,
         ];

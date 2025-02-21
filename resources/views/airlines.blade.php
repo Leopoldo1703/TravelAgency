@@ -48,7 +48,26 @@
                     </tr>
                 </tbody>
                 </table>
-            </div>
+                <div id="pagination-container" class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                        <p id="pagination-info" class="text-sm text-gray-700"></p>
+                        <nav id="pagination-controls" class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+                            <a href="#" id="prev-page" class="relative inline-flex items-center rounded-l-md px-3 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 hidden">
+                                <span class="sr-only">Previous</span>
+                                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                            <div id="pagination-pages" class="flex space-x-1"></div>
+                            <a href="#" id="next-page" class="relative inline-flex items-center rounded-r-md px-3 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 hidden">
+                                <span class="sr-only">Next</span>
+                                <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -57,10 +76,11 @@
 @push('scripts')
     <script>
         let editingAirlineId = 0;
+        let currentPage = 1;
 
         async function loadCities() {
             try {
-                const response = await fetch('/api/cities');
+                const response = await fetch('/api/cities?page=${page}');
                 const cities = await response.json();
 
                 const select = document.getElementById('filter-city');
@@ -77,9 +97,9 @@
             }
         }
 
-        async function loadAirlines(cityId = '', flightCount = '') {
+        async function loadAirlines(page = 1, cityId = '', flightCount = '') {
             try {
-                let query = [];
+                let query = [`page=${page}`];
 
                 if (cityId) query.push(`filter[city]=${cityId}`);
                 if (flightCount) query.push(`filter[active_flights]=${flightCount}`);
@@ -91,8 +111,6 @@
 
                 const tbody = document.querySelector('#airlines-table tbody');
                 tbody.innerHTML = '';
-
-                console.log(airlines.data);
 
                 airlines.data.forEach(airline => {
                     if (editingAirlineId == airline.id){
@@ -127,10 +145,68 @@
                         </tr>`;
                     }
                 });
+
+                updatePaginationControls(airlines.pagination);
+
             } catch (error) {
                 console.error('Error:', error);
             }
         }
+
+        function updatePaginationControls(meta) {
+            const paginationContainer = document.getElementById('pagination-container');
+            const paginationInfo = document.getElementById('pagination-info');
+            const paginationPages = document.getElementById('pagination-pages');
+            const prevPage = document.getElementById('prev-page');
+            const nextPage = document.getElementById('next-page');
+
+            if (!meta || !meta.totalPages) {
+                paginationContainer.classList.add("hidden");
+                return;
+            }
+
+            paginationContainer.classList.remove("hidden");
+
+            const from = (meta.currentPage - 1) * meta.perPage + 1;
+            const to = Math.min(meta.currentPage * meta.perPage, meta.total);
+
+            paginationInfo.textContent = `Showing ${from} to ${to} of ${meta.total} results`;
+
+            paginationPages.innerHTML = '';
+
+            prevPage.classList.toggle("hidden", meta.currentPage === 1);
+            prevPage.onclick = (event) => {
+                event.preventDefault();
+                loadAirlines(meta.currentPage - 1);
+            };
+
+            for (let i = 1; i <= meta.totalPages; i++) {
+                const pageLink = document.createElement('a');
+                pageLink.href = "#";
+                pageLink.classList.add("relative", "inline-flex", "items-center", "px-4", "py-2", "text-sm", "font-semibold");
+
+                if (i === meta.currentPage) {
+                    pageLink.classList.add("bg-indigo-600", "text-white");
+                } else {
+                    pageLink.classList.add("text-gray-900", "ring-1", "ring-gray-300", "ring-inset", "hover:bg-gray-50");
+                    pageLink.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        loadAirlines(i);
+                    });
+                }
+
+                pageLink.textContent = i;
+                paginationPages.appendChild(pageLink);
+            }
+
+            nextPage.classList.toggle("hidden", meta.currentPage === meta.totalPages);
+            nextPage.onclick = (event) => {
+                event.preventDefault();
+                loadAirlines(meta.currentPage + 1);
+            };
+        }
+
+
 
         document.getElementById('apply-filters').addEventListener('click', () => {
             const cityId = document.getElementById('filter-city').value;
