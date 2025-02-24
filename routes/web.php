@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Lightit\Shared\App\Exceptions\InvalidActionException;
 
-Route::get('/welcome', function () {
-    return view('welcome');
+Route::get('/', function () {
+    return redirect('/cities');
 });
 
 Route::get('/cities', function () {

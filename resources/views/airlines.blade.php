@@ -77,6 +77,7 @@
     <script>
         let editingAirlineId = 0;
         let currentPage = 1;
+        let currentFilters = { cityId: '', flightCount: '' };
 
         async function loadCities() {
             try {
@@ -97,63 +98,45 @@
             }
         }
 
-        async function loadAirlines(page = 1, cityId = '', flightCount = '') {
-            try {
-                let query = [`page=${page}`];
+        function loadAirlines(page = 1, filters = {}) {
+            let query = [`page=${page}`];
 
-                if (cityId) query.push(`filter[city]=${cityId}`);
-                if (flightCount) query.push(`filter[active_flights]=${flightCount}`);
+            if (filters.cityId) query.push(`filter[city]=${filters.cityId}`);
+            if (filters.flightCount) query.push(`filter[active_flights]=${filters.flightCount}`);
 
-                const queryString = query.length ? `?${query.join('&')}` : '';
+            fetch(`/api/airlines?${query.join('&')}`)
+                .then(response => response.json())
+                .then(({ data, pagination }) => {
+                    const tbody = document.querySelector('#airlines-table tbody');
+                    tbody.innerHTML = '';
 
-                const response = await fetch(`/api/airlines${queryString}`);
-                const airlines = await response.json();
-
-                const tbody = document.querySelector('#airlines-table tbody');
-                tbody.innerHTML = '';
-
-                airlines.data.forEach(airline => {
-                    if (editingAirlineId == airline.id){
-                        tbody.innerHTML += `
-                        <tr data-id="${airline.id}">
-                            <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">${airline.id}</td>
-                            <td class="px-3 py-4 text-sm">
-                                <input type="text" id="edit-name-${airline.id}" value="${airline.name}" class="rounded-md border border-gray-300 p-1 w-full">
-                            </td>
-                            <td class="px-3 py-4 text-sm">
-                                <input type="text" id="edit-description-${airline.id}" value="${airline.description}" class="rounded-md border border-gray-300 p-1 w-full">
-                            </td>
-                            <td class="relative py-4 pl-3 text-right text-sm font-medium">
-                                <button class="save text-green-600 hover:text-green-900 mr-2" data-id="${airline.id}">Save</button>
-                                <button class="cancel text-gray-600 hover:text-gray-900 ml-2" data-id="${airline.id}">Cancel</button>
-                            </td>
-                        </tr>`;
+                    if (data.length > 0) {
+                        data.forEach(airline => {
+                            tbody.innerHTML += `
+                                <tr data-id="${airline.id}">
+                                    <td class="py-4 pr-3 pl-4 text-sm font-medium text-gray-900 sm:pl-3">${airline.id}</td>
+                                    <td class="px-3 py-4 text-sm text-gray-500">${airline.name}</td>
+                                    <td class="px-3 py-4 text-sm text-gray-500">${airline.description}</td>
+                                    <td class="px-3 py-4 text-sm text-gray-500">${airline.number_of_flights}</td>
+                                    <td class="py-4 pl-3 text-right text-sm font-medium">
+                                        <a href="#" class="edit text-indigo-600 hover:text-indigo-900" data-id="${airline.id}">Edit</a>
+                                    </td>
+                                    <td class="py-4 pl-3 text-right text-sm font-medium">
+                                        <a href="#" class="delete text-red-600 hover:text-red-900" data-id="${airline.id}">Delete</a>
+                                    </td>
+                                </tr>`;
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-sm text-gray-500">No airlines found.</td></tr>`;
                     }
-                    else{
-                    tbody.innerHTML += `
-                        <tr data-id="${airline.id}">
-                            <td class="py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-3">${airline.id}</td>
-                            <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${airline.name}</td>
-                            <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${airline.description}</td>
-                            <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500">${airline.number_of_flights}</td>
-                            <td class="relative py-4 pl-3 text-right text-sm font-medium">
-                                <a href="#" class="edit text-indigo-600 hover:text-indigo-900" data-id="${airline.id}" data-name="${airline.name}">Edit</a>
-                            </td>
-                            <td class="relative py-4 pl-3 text-right text-sm font-medium">
-                                <a href="#" class="delete text-red-600 hover:text-red-900" data-id="${airline.id}">Delete</a>
-                            </td>
-                        </tr>`;
-                    }
-                });
 
-                updatePaginationControls(airlines.pagination);
-
-            } catch (error) {
-                console.error('Error:', error);
-            }
+                    updatePaginationControls(pagination, filters);
+                })
+                .catch(error => console.error('Error loading airlines:', error));
         }
 
-        function updatePaginationControls(meta) {
+
+        function updatePaginationControls(meta, filters) {
             const paginationContainer = document.getElementById('pagination-container');
             const paginationInfo = document.getElementById('pagination-info');
             const paginationPages = document.getElementById('pagination-pages');
@@ -169,7 +152,6 @@
 
             const from = (meta.currentPage - 1) * meta.perPage + 1;
             const to = Math.min(meta.currentPage * meta.perPage, meta.total);
-
             paginationInfo.textContent = `Showing ${from} to ${to} of ${meta.total} results`;
 
             paginationPages.innerHTML = '';
@@ -177,7 +159,7 @@
             prevPage.classList.toggle("hidden", meta.currentPage === 1);
             prevPage.onclick = (event) => {
                 event.preventDefault();
-                loadAirlines(meta.currentPage - 1);
+                loadAirlines(meta.currentPage - 1, filters);
             };
 
             for (let i = 1; i <= meta.totalPages; i++) {
@@ -191,7 +173,7 @@
                     pageLink.classList.add("text-gray-900", "ring-1", "ring-gray-300", "ring-inset", "hover:bg-gray-50");
                     pageLink.addEventListener("click", (event) => {
                         event.preventDefault();
-                        loadAirlines(i);
+                        loadAirlines(i, filters);
                     });
                 }
 
@@ -202,16 +184,18 @@
             nextPage.classList.toggle("hidden", meta.currentPage === meta.totalPages);
             nextPage.onclick = (event) => {
                 event.preventDefault();
-                loadAirlines(meta.currentPage + 1);
+                loadAirlines(meta.currentPage + 1, filters);
             };
         }
 
 
 
         document.getElementById('apply-filters').addEventListener('click', () => {
-            const cityId = document.getElementById('filter-city').value;
-            const flightCount = document.getElementById('filter-flights').value;
-            loadAirlines(cityId, flightCount);
+            currentFilters = {
+                cityId: document.getElementById('filter-city').value,
+                flightCount: document.getElementById('filter-flights').value
+            };
+            loadAirlines(1, currentFilters);
         });
 
         function showMessage(message, type = 'success') {
