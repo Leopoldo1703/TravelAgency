@@ -22,8 +22,8 @@ class FlightTransformer extends Transformer
             'origin_name' => $flight->originCity ? $flight->originCity->name : null,
             'destination_id' => $flight->destination_id,
             'destination_name'=> $flight->destinationCity ? $flight->destinationCity->name : null,
-            'departure' => $flight->departure,
-            'arrival' => $flight->arrival,
+            'departure' => $flight->departure->format('Y-m-d H:i:s'),
+            'arrival' => $flight->arrival->format('Y-m-d H:i:s'),
         ];
     }
 }

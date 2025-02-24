@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lightit\Backoffice\Flights\Domain\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Lightit\Backoffice\Airlines\Domain\Models\Airline;
@@ -14,8 +15,8 @@ use Lightit\Backoffice\Cities\Domain\Models\City;
  * @property int                             $airline_id
  * @property int                             $origin_id
  * @property int                             $destination_id
- * @property string                          $departure
- * @property string                          $arrival
+ * @property Carbon                          $departure
+ * @property Carbon                          $arrival
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Airline $airline
@@ -48,6 +49,11 @@ class Flight extends Model
         'destination_id',
         'departure',
         'arrival',
+    ];
+
+    protected $casts = [
+        'departure' => 'datetime',
+        'arrival' => 'datetime',
     ];
 
     /**

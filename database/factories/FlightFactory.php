@@ -17,9 +17,18 @@ class FlightFactory extends Factory
     protected $model = Flight::class;
     public function definition(): array
     {
-        $airline = Airline::inRandomOrder()->firstOrFail();
-        $origin = City::inRandomOrder()->firstOrFail();
-        $destination = City::where('id', '!=', $origin->id)->inRandomOrder()->firstOrFail();
+        /**
+         * @var Airline
+         */
+        $airline = Airline::inRandomOrder()->first() ?: AirlineFactory::new()->create();
+        /**
+         * @var City
+         */
+        $origin = City::inRandomOrder()->first() ?: CityFactory::new()->create();
+        /**
+         * @var City
+         */
+        $destination = City::where('id', '!=', $origin->id)->inRandomOrder()->first() ?: CityFactory::new()->create();
         $departure = fake()->dateTimeBetween('now', '+1 month');
         $arrival = fake()->dateTimeBetween($departure, $departure->modify('+2 days'));
 
