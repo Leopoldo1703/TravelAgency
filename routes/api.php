@@ -83,7 +83,7 @@ Route::prefix('flights')
         Route::post('/', StoreFlightController::class)->name('flights');
         Route::get('/', ListFlightsController::class);
         Route::prefix('{flight}')->group(function () {
-            Route::get('/', ListFlightsController::class);
+            Route::get('/', GetFlightController::class);
             Route::put('/', UpdateFlightController::class);
             Route::delete('/', DeleteFlightController::class);
         });
