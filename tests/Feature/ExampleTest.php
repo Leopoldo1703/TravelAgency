@@ -13,5 +13,5 @@ it('returns a successful response', function () {
 
     $response = get('/');
 
-    $response->assertSuccessful();
+    $response->assertRedirect();
 });
